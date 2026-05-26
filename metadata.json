@@ -1,0 +1,6 @@
+{
+  "name": "Mentor Vivo 365",
+  "description": "Plataforma de mentoria combinando inteligência artificial e mentores humanos para engajamento e redução de evasão de estudantes com visual claymorphic.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
