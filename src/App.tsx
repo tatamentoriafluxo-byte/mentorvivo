@@ -27,6 +27,10 @@ export default function App() {
     setSelectedStudentId(id);
   };
 
+  const handleUpdateStudent = (updatedNameOrObj: Student) => {
+    setStudents((current) => current.map((s) => (s.id === updatedNameOrObj.id ? updatedNameOrObj : s)));
+  };
+
   const handleAddStudent = (newStudent: Student) => {
     setStudents((prev) => [newStudent, ...prev]);
   };
@@ -51,6 +55,7 @@ export default function App() {
             selectedStudent={selectedStudent}
             students={students}
             onSelectStudent={handleSelectStudent}
+            onUpdateStudent={handleUpdateStudent}
           />
         )}
 
@@ -68,9 +73,7 @@ export default function App() {
             student={selectedStudent}
             allStudents={students}
             onBack={() => setActiveTab('students')}
-            onUpdateStudent={(updated) => {
-              setStudents((current) => current.map((s) => (s.id === updated.id ? updated : s)));
-            }}
+            onUpdateStudent={handleUpdateStudent}
           />
         )}
 

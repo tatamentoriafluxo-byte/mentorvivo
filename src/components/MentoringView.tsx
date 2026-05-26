@@ -6,9 +6,10 @@ interface MentoringViewProps {
   selectedStudent: Student;
   students: Student[];
   onSelectStudent: (studentId: string) => void;
+  onUpdateStudent?: (updated: Student) => void;
 }
 
-export default function MentoringView({ selectedStudent, students, onSelectStudent }: MentoringViewProps) {
+export default function MentoringView({ selectedStudent, students, onSelectStudent, onUpdateStudent }: MentoringViewProps) {
   // Messages state mapped by student ID
   const [allChats, setAllChats] = useState<Record<string, Message[]>>(INITIAL_CHATS);
   const [inputText, setInputText] = useState('');
@@ -401,6 +402,71 @@ export default function MentoringView({ selectedStudent, students, onSelectStude
               }`}
             >
               {isManualIntervention ? 'Liberar para Auxílio IA' : 'Assumir Conversa'}
+            </button>
+          </div>
+
+          {/* Simulated Webhook Trigger for Repositories */}
+          <div className="bg-slate-50 rounded-3xl border border-slate-200/60 p-5 flex flex-col gap-3">
+            <div className="flex items-start gap-2.5">
+              <span className="material-symbols-outlined text-slate-500 font-bold">terminal</span>
+              <div>
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                  Simulador de Eventos (GitHub)
+                </h4>
+                <p className="text-[10px] text-slate-500 font-semibold leading-relaxed mt-0.5">
+                  Simule eventos do GitHub para testar o reengajamento automático. Caso o repositório esteja vazio (ex: Beatriz), envie novos commits por aqui para atualizar o status e reduzir o risco.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                let updatedStudent = { ...selectedStudent };
+                if (selectedStudent.id === 'student-beatriz-silva') {
+                  updatedStudent = {
+                    ...selectedStudent,
+                    risk: 'Baixo' as 'Baixo',
+                    currentStatusText: 'Superou a paralisia inicial! Primeiro commit detectado via webhook do GitHub. Demonstra maior confiança e engajamento.',
+                    aiMemory: selectedStudent.aiMemory.map(mem => {
+                      if (mem.week === 'Estágio Atual: Paralisia') {
+                        return {
+                          ...mem,
+                          week: 'Estágio Estável: Ativo',
+                          desc: 'Primeiros commits enviados com sucesso via GitHub! Repositório populado e ativo.',
+                          icon: 'verified',
+                          color: 'text-emerald-600 bg-emerald-100'
+                        };
+                      }
+                      return mem;
+                    })
+                  };
+                  alert('Sincronização Simulação: Webhook de novos commits recebido do GitHub para Beatriz Silva! O repositório agora está ativo (não está mais vazio), o risco foi reduzido para Baixo e a paralisia de onboarding foi superada!');
+                } else {
+                  updatedStudent = {
+                    ...selectedStudent,
+                    risk: 'Baixo' as 'Baixo',
+                    currentStatusText: `Código atualizado via Git. Sincronização de novos commits concluída com sucesso!`,
+                    aiMemory: [
+                      {
+                        week: 'Hoje: Novas Entregas',
+                        status: 'check',
+                        desc: 'Novos commits recebidos via webhook do GitHub. Repositório atualizado.',
+                        icon: 'code',
+                        color: 'text-emerald-600 bg-emerald-100'
+                      },
+                      ...selectedStudent.aiMemory
+                    ]
+                  };
+                  alert(`Simulando Webhook: Novos commits recebidos do GitHub para ${selectedStudent.name}. Repositório sincronizado e atualizado!`);
+                }
+                if (onUpdateStudent) {
+                  onUpdateStudent(updatedStudent);
+                }
+              }}
+              className="w-full bg-[#006b5e] hover:bg-[#005c50] text-white font-bold text-xs py-2.5 rounded-2xl shadow transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <span className="material-symbols-outlined text-sm font-bold animate-spin-slow">sync</span>
+              Simular Webhook: Push de Commits (GitHub)
             </button>
           </div>
         </div>

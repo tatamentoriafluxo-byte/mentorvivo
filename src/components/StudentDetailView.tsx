@@ -58,23 +58,55 @@ export default function StudentDetailView({
   const [isAddingMeeting, setIsAddingMeeting] = useState(false);
 
   // Business Assets with simulated dynamic AI recommendations
-  const [assets, setAssets] = useState([
-    { id: 'a1', type: 'Projeto GitHub', name: 'modulo1-calculadora-js', status: 'Revisado', url: 'github.com/lucas/calc', analysis: 'Estruturação semântica excelente. Necessita otimizar legibilidade do loop na linha 42.' },
-    { id: 'a2', type: 'Página de Vendas (Simulação)', name: 'landing-page-vendas-v1', status: 'Aguardando IA', url: 'figma.com/file/vendas-lucas', analysis: 'Aguardando diagnóstico inteligente do orquestrador.' }
-  ]);
+  const [assets, setAssets] = useState<any[]>([]);
   const [newAssetName, setNewAssetName] = useState('');
   const [newAssetType, setNewAssetType] = useState('Projeto GitHub');
   const [newAssetUrl, setNewAssetUrl] = useState('');
 
   // Interactive Checklist Tasks
-  const [tasks, setTasks] = useState([
-    { id: 't1', title: 'Completar Questionário de Onboarding', completed: true, origin: 'Manual', deadline: 'Concluído' },
-    { id: 't2', title: 'Assistir Vídeo Arrays Descomplicados (3 min)', completed: false, origin: 'IA Sugestão', deadline: 'Hoje' },
-    { id: 't3', title: 'Submeter Exercício 3 refatorado', completed: false, origin: 'Reunião Semana 2', deadline: 'Amanhã' },
-  ]);
+  const [tasks, setTasks] = useState<any[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskOrigin, setNewTaskOrigin] = useState('Manual');
   const [newTaskDeadline, setNewTaskDeadline] = useState('Amanhã');
+
+  // Load student-specific assets and tasks on mount or student shift
+  React.useEffect(() => {
+    if (student.id === 'student-beatriz-silva') {
+      setAssets([
+        { 
+          id: 'a1', 
+          type: 'Projeto GitHub', 
+          name: 'modulo1-onboarding-logica', 
+          status: 'Vazio / Sem Commits', 
+          url: 'github.com/beatriz/onboarding-logica', 
+          analysis: 'Dúvidas em andamento: Repositório foi clonado no ambiente local contudo não foram detectadas linhas de arquivos enviadas nos últimos 4 dias. Risco alto de paralisia funcional.' 
+        }
+      ]);
+      setTasks([
+        { id: 't1', title: 'Completar Questionário de Onboarding', completed: true, origin: 'Manual', deadline: 'Concluído' },
+        { id: 't2', title: 'Sincronizar primeiro commit (GitHub)', completed: false, origin: 'Sistema Alerta', deadline: 'Hoje' },
+        { id: 't3', title: 'Participar da sessão opcional de redução de ansiedade', completed: false, origin: 'IA Sugestão', deadline: 'Amanhã' }
+      ]);
+    } else if (student.id === 'student-lucas-silva') {
+      setAssets([
+        { id: 'a1', type: 'Projeto GitHub', name: 'modulo1-calculadora-js', status: 'Revisado', url: 'github.com/lucas/calc', analysis: 'Estruturação semântica excelente. Necessita otimizar legibilidade do loop na linha 42.' },
+        { id: 'a2', type: 'Página de Vendas (Simulação)', name: 'landing-page-vendas-v1', status: 'Aguardando IA', url: 'figma.com/file/vendas-lucas', analysis: 'Aguardando diagnóstico inteligente do orquestrador.' }
+      ]);
+      setTasks([
+        { id: 't1', title: 'Completar Questionário de Onboarding', completed: true, origin: 'Manual', deadline: 'Concluído' },
+        { id: 't2', title: 'Assistir Vídeo Arrays Descomplicados (3 min)', completed: false, origin: 'IA Sugestão', deadline: 'Hoje' },
+        { id: 't3', title: 'Submeter Exercício 3 refatorado', completed: false, origin: 'Reunião Semana 2', deadline: 'Amanhã' },
+      ]);
+    } else {
+      setAssets([
+        { id: 'a1', type: 'Projeto GitHub', name: `modulo1-${student.name.toLowerCase().replace(/\s/g, '')}`, status: 'Revisado', url: `github.com/${student.id.replace('student-', '')}/main`, analysis: 'Nenhuma pendência prioritária de código identificada.' }
+      ]);
+      setTasks([
+        { id: 't1', title: 'Questionário Inicial', completed: true, origin: 'Manual', deadline: 'Concluído' },
+        { id: 't2', title: 'Acompanhar cronograma semanal', completed: false, origin: 'Manual', deadline: 'Esta Semana' }
+      ]);
+    }
+  }, [student.id]);
 
   // Trigger Memory Save
   const handleSaveMemory = (key: keyof typeof memories) => {
@@ -819,13 +851,58 @@ export default function StudentDetailView({
                       </div>
                     </div>
 
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold shadow-sm ${
-                      asset.status === 'Revisado'
-                        ? 'bg-[#96f3e1] text-[#003c34]'
-                        : 'bg-orange-100 text-[#855316]'
-                    }`}>
-                      {asset.status}
-                    </span>
+                    <div className="flex flex-col items-end gap-2 shrink-0">
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold shadow-sm ${
+                        asset.status === 'Revisado'
+                          ? 'bg-[#96f3e1] text-[#003c34]'
+                          : asset.status === 'Vazio / Sem Commits'
+                          ? 'bg-rose-100 text-rose-700 border border-rose-200'
+                          : 'bg-orange-100 text-[#855316]'
+                      }`}>
+                        {asset.status}
+                      </span>
+
+                      {asset.status === 'Vazio / Sem Commits' && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // Update student globally in parent
+                            const updatedDetailStudent = {
+                              ...student,
+                              status: 'Ativo' as any,
+                              risk: 'Baixo' as any,
+                              currentStatusText: 'Superou a paralisia inicial! Primeiro commit detectador via webhook da Evolution API e GitHub. Demonstra segurança e engajamento.',
+                              aiMemory: student.aiMemory.map(mem => {
+                                if (mem.week === 'Estágio Atual: Paralisia') {
+                                  return {
+                                    ...mem,
+                                    week: 'Estágio Estável: Ativo',
+                                    desc: 'Primeiros commits enviados com sucesso via GitHub! Repositório populado e ativo.',
+                                    icon: 'verified',
+                                    color: 'text-emerald-600 bg-emerald-100'
+                                  };
+                                }
+                                return mem;
+                              })
+                            };
+                            onUpdateStudent(updatedDetailStudent);
+                            
+                            // Update local assets state
+                            setAssets(prev => prev.map(a => a.id === asset.id ? {
+                              ...a,
+                              status: 'Revisado',
+                              analysis: 'Sincronização concluída via webhook do GitHub! Foram detectadas novas alterações e testes remotos foram executados com absoluto sucesso.'
+                            } : a));
+                            
+                            alert('Sincronização e Webhook: Novos commits recebidos do GitHub para Beatriz Silva! O repositório agora está ativo (não está mais vazio), o risco foi reduzido para Baixo e a paralisia inicial de onboarding foi inteiramente superada!');
+                          }}
+                          className="bg-[#006b5e] hover:bg-[#005c50] text-white font-semibold text-[10px] py-1.5 px-3 rounded-xl shadow-sm cursor-pointer transition-all flex items-center gap-1 mt-1"
+                        >
+                          <span className="material-symbols-outlined !text-[12px] font-bold">sync</span>
+                          Simular Commit (GitHub)
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
